@@ -72,7 +72,7 @@ public class MainFrame extends JFrame {
 					}
 					
 					dispose();
-					BoardFrame bf = new BoardFrame(messageRepository, newUser);
+					BoardFrame bf = new BoardFrame(messageRepository, newUser, userRepository);
 					bf.setVisible(true);
 				} else {
 					JOptionPane.showMessageDialog(null, "Você deve inserir um nickname de até 100 cacteres para acessar!", "Erro", JOptionPane.ERROR_MESSAGE);

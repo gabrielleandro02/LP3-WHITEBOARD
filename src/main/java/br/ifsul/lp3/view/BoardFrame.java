@@ -1,6 +1,5 @@
 package br.ifsul.lp3.view;
 
-import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Date;
@@ -14,6 +13,7 @@ import javax.swing.border.EmptyBorder;
 import br.ifsul.lp3.model.Message;
 import br.ifsul.lp3.model.User;
 import br.ifsul.lp3.repository.MessageRepository;
+import br.ifsul.lp3.repository.UserRepository;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -22,39 +22,41 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.JSeparator;
-import java.awt.Color;
 import javax.swing.ScrollPaneConstants;
 
-public class BoardFrame extends JFrame {
+public class BoardFrame extends JFrame implements Runnable {
 	
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JTextField tfMessageText;
 	
-	private DefaultListModel<String> model = new DefaultListModel<>();
+	private static DefaultListModel<String> model = new DefaultListModel<>();
 	
-	private final List<String> reloadMessages(MessageRepository messageRepository) {
-		List<Message> messages = messageRepository.findAll();
+	private static MessageRepository messageRepositoryStatic;
+	
+	//UPDATE MESSAGES FUNCTION
+	private final void reloadMessages() {
+		model.clear();
+		List<Message> messages = messageRepositoryStatic.findAll();
 		List<String> formmatedMessages = new ArrayList<>();
 		
 		messages.forEach(message -> {
 			String formattedString =  message.getText() + " - " + message.getUser().getNickname() + " - " + message.getDate().toLocaleString();
 			formmatedMessages.add(formattedString);
 		});
-		return formmatedMessages;
+		model.addAll(formmatedMessages);
 	}
 
-	public BoardFrame(MessageRepository messageRepository, User userActive) {
+	public BoardFrame(MessageRepository messageRepository, User userActive, UserRepository userRepository) {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
 		
-		model.addAll(this.reloadMessages(messageRepository));
-				
+		messageRepositoryStatic = messageRepository;
+		contentPane.setLayout(null);
+		
 		JList<String> messagesList = new JList<>(model);
 		
 		messagesList.setModel(model);
@@ -66,13 +68,13 @@ public class BoardFrame extends JFrame {
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		scrollPane.setBounds(20, 40, 386, 170);
-		this.getContentPane().add(scrollPane, BorderLayout.CENTER);
+		this.getContentPane().add(scrollPane);
 
         
 		//TITLE OF PAGE
 		JLabel lblNewLabel = new JLabel("Quadro Branco");
 		lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 20));
-		lblNewLabel.setBounds(139, 11, 145, 25);
+		lblNewLabel.setBounds(139, 4, 145, 25);
 		contentPane.add(lblNewLabel);
 		
 		//MESSAGE TEXT FIELD
@@ -83,7 +85,7 @@ public class BoardFrame extends JFrame {
 		
 		//BUTTON OF SEND MESSAGE
 		JButton btnSend = new JButton("Enviar");
-		btnSend.setBounds(332, 225, 74, 25);	
+		btnSend.setBounds(329, 225, 77, 25);	
 		btnSend.addActionListener((ActionEvent evt) -> {
 			if(tfMessageText.getText().length() > 0) {
 				Message newMessage = new Message();
@@ -95,23 +97,39 @@ public class BoardFrame extends JFrame {
 				
 				if(newMessage.getId() != null) {
 					tfMessageText.setText("");
-					model.clear();
-					model.addAll(this.reloadMessages(messageRepository));
+					this.reloadMessages();
 				} else {
 					JOptionPane.showMessageDialog(null, "Não foi possível enviar a mensagem! Tente novamente.", "Erro", JOptionPane.ERROR_MESSAGE);	
 				}
-				
 			} else {
 				JOptionPane.showMessageDialog(null, "Você deve inserir um texto para enviar!", "Erro", JOptionPane.ERROR_MESSAGE);
 			}
         });
 		contentPane.add(btnSend);
 		
-		//SEPARATOR
-		JSeparator separator = new JSeparator();
-		separator.setForeground(Color.BLACK);
-		separator.setBounds(10, 213, 403, 11);
-		contentPane.add(separator, BorderLayout.CENTER);
+		//BUTTON CLOSE ROOM
+		JButton btnClose = new JButton("Sair da Sala");
+		btnClose.setBounds(20, 6, 109, 23);
+		btnClose.addActionListener((ActionEvent evt) -> {
+			dispose();
+			MainFrame mf = new MainFrame(userRepository, messageRepository);
+			mf.setVisible(true);
+        });
+		contentPane.add(btnClose);
 		
+		//START THREAD
+		Thread t = new Thread(this);
+		t.start();
+	}
+
+	@Override
+	public void run() {
+		try {
+			Thread.sleep(2000);
+		} catch(Exception e) {
+			JOptionPane.showMessageDialog(null, "Não foi possível atualizar mensagens.", "Erro", JOptionPane.ERROR_MESSAGE);	
+		}
+		this.reloadMessages();
+		System.out.println("THREAD RODOU");
 	}
 }
