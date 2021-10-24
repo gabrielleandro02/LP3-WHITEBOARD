@@ -2,6 +2,7 @@ package br.ifsul.lp3.view;
 
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.awt.Font;
@@ -36,15 +37,22 @@ public class BoardFrame extends JFrame implements Runnable {
 	
 	//UPDATE MESSAGES FUNCTION
 	private final void reloadMessages() {
+		
+		Calendar dateMax = Calendar.getInstance();
+		
+		Calendar dateMin = Calendar.getInstance();
+		dateMin.add(Calendar.HOUR, -1);
+		
 		model.clear();
-		List<Message> messages = messageRepositoryStatic.findAll();
-		List<String> formmatedMessages = new ArrayList<>();
+		List<Message> messages = messageRepositoryStatic.findAllByDateBetweenOrderByDateDesc(dateMin.getTime(), dateMax.getTime());
+		List<String> formattedMessages = new ArrayList<>();
 		
 		messages.forEach(message -> {
+			@SuppressWarnings("deprecation")
 			String formattedString =  message.getText() + " - " + message.getUser().getNickname() + " - " + message.getDate().toLocaleString();
-			formmatedMessages.add(formattedString);
+			formattedMessages.add(formattedString);
 		});
-		model.addAll(formmatedMessages);
+		model.addAll(formattedMessages);
 	}
 
 	public BoardFrame(MessageRepository messageRepository, User userActive, UserRepository userRepository) {

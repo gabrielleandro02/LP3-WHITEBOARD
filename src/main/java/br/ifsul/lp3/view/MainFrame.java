@@ -18,6 +18,8 @@ import java.util.Optional;
 
 import javax.swing.JTextField;
 import javax.swing.JButton;
+import java.awt.Color;
+import javax.swing.JSeparator;
 
 public class MainFrame extends JFrame {
 
@@ -40,20 +42,20 @@ public class MainFrame extends JFrame {
 		
 		JLabel lblNewLabel_1 = new JLabel("Para acessar a sala, insira um nickname:");
 		lblNewLabel_1.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		lblNewLabel_1.setBounds(84, 74, 272, 19);
+		lblNewLabel_1.setBounds(84, 47, 272, 19);
 		contentPane.add(lblNewLabel_1);
 		
 		JLabel lblNewLabel_2 = new JLabel("Nickname");
-		lblNewLabel_2.setBounds(194, 123, 67, 14);
+		lblNewLabel_2.setBounds(190, 73, 67, 14);
 		contentPane.add(lblNewLabel_2);
 		
 		nicknameField = new JTextField();
-		nicknameField.setBounds(154, 137, 134, 20);
+		nicknameField.setBounds(150, 89, 134, 20);
 		contentPane.add(nicknameField);
 		nicknameField.setColumns(100);
 		
 		JButton btnEnter = new JButton("Entrar");
-		btnEnter.setBounds(173, 192, 99, 23);
+		btnEnter.setBounds(170, 120, 99, 23);
 		btnEnter.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(nicknameField.getText().length() > 0 && nicknameField.getText().length() <= 100) {
@@ -80,5 +82,27 @@ public class MainFrame extends JFrame {
 			}
 		});
 		contentPane.add(btnEnter);
+		
+		
+		JSeparator separator = new JSeparator();
+		separator.setBounds(24, 164, 386, 2);
+		contentPane.add(separator);
+		
+		JLabel lblNewLabel_1_1 = new JLabel("Gerar relatório");
+		lblNewLabel_1_1.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		lblNewLabel_1_1.setBounds(175, 185, 125, 19);
+		contentPane.add(lblNewLabel_1_1);
+		
+		JButton btnReport = new JButton("Ver Relatório");
+		btnReport.setBackground(Color.CYAN);
+		btnReport.setBounds(150, 215, 134, 23);
+		btnReport.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dispose();
+				ReportMenuFrame rmf = new ReportMenuFrame(userRepository, messageRepository);
+				rmf.setVisible(true);
+			}
+		});
+		contentPane.add(btnReport);
 	}
 }
