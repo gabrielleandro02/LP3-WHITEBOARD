@@ -22,11 +22,13 @@ import javax.swing.JButton;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.JList;
+import javax.swing.SwingConstants;
 
 public class ReportFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
+	private JLabel labelLoading;
 	private static DefaultListModel<String> model = new DefaultListModel<>();
 	
 	private static MessageRepository messageRepositoryStatic;
@@ -43,6 +45,7 @@ public class ReportFrame extends JFrame {
 			formattedMessages.add(formattedString);
 		});
 		model.addAll(formattedMessages);
+		labelLoading.setText("Mensagens");
 	}
 	
 	private final void loadNicknames() {
@@ -55,6 +58,7 @@ public class ReportFrame extends JFrame {
 			formattedUsers.add(formattedString);
 		});
 		model.addAll(formattedUsers);
+		labelLoading.setText("Nicknames");
 	}
 
 	public ReportFrame(MessageRepository messageRepository, UserRepository userRepository, TypeReportEnum type) {
@@ -92,6 +96,12 @@ public class ReportFrame extends JFrame {
 		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		scrollPane.setBounds(20, 40, 391, 210);
 		this.getContentPane().add(scrollPane);
+		
+		//LABEL LOADING
+		labelLoading = new JLabel("Carregando...");
+		labelLoading.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		labelLoading.setHorizontalAlignment(SwingConstants.CENTER);
+		scrollPane.setColumnHeaderView(labelLoading);
 		
 		if(type == TypeReportEnum.MESSAGES) {
 			this.loadMessages();

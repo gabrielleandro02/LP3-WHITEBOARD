@@ -24,12 +24,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
 
 public class BoardFrame extends JFrame implements Runnable {
 	
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JTextField tfMessageText;
+	private JLabel labelLoadingStatic;
 	
 	private static DefaultListModel<String> model = new DefaultListModel<>();
 	
@@ -53,8 +55,10 @@ public class BoardFrame extends JFrame implements Runnable {
 			formattedMessages.add(formattedString);
 		});
 		model.addAll(formattedMessages);
+		labelLoadingStatic.setText("Mensagens");
 	}
 
+	@SuppressWarnings("deprecation")
 	public BoardFrame(MessageRepository messageRepository, User userActive, UserRepository userRepository) {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
@@ -77,6 +81,12 @@ public class BoardFrame extends JFrame implements Runnable {
 		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		scrollPane.setBounds(20, 40, 386, 170);
 		this.getContentPane().add(scrollPane);
+		
+		//LABEL LOADING
+		labelLoadingStatic = new JLabel("Carregando...");
+		labelLoadingStatic.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		labelLoadingStatic.setHorizontalAlignment(SwingConstants.CENTER);
+		scrollPane.setColumnHeaderView(labelLoadingStatic);
 
         
 		//TITLE OF PAGE
@@ -115,29 +125,35 @@ public class BoardFrame extends JFrame implements Runnable {
         });
 		contentPane.add(btnSend);
 		
+		//START THREAD
+		Thread t = new Thread(this);
+		t.start();
+		
 		//BUTTON CLOSE ROOM
 		JButton btnClose = new JButton("Sair da Sala");
 		btnClose.setBounds(20, 6, 109, 23);
 		btnClose.addActionListener((ActionEvent evt) -> {
+			t.stop();
 			dispose();
 			MainFrame mf = new MainFrame(userRepository, messageRepository);
 			mf.setVisible(true);
         });
 		contentPane.add(btnClose);
-		
-		//START THREAD
-		Thread t = new Thread(this);
-		t.start();
 	}
 
 	@Override
 	public void run() {
-		try {
-			Thread.sleep(2000);
-		} catch(Exception e) {
-			JOptionPane.showMessageDialog(null, "Não foi possível atualizar mensagens.", "Erro", JOptionPane.ERROR_MESSAGE);	
+		
+		Boolean isEmptyMessages = BoardFrame.messageRepositoryStatic.findAll().isEmpty();
+		Boolean isVisible = isVisible();
+		while(!isEmptyMessages && isVisible) {
+			try {
+				Thread.sleep(5000);
+				this.reloadMessages();
+				System.out.println("THREAD RODOU");			
+			} catch(Exception e) {
+				JOptionPane.showMessageDialog(null, "Não foi possível atualizar mensagens.", "Erro", JOptionPane.ERROR_MESSAGE);	
+			}
 		}
-		this.reloadMessages();
-		System.out.println("THREAD RODOU");
 	}
 }
